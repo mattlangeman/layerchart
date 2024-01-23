@@ -3,7 +3,7 @@
   import { cubicInOut } from 'svelte/easing';
   import { scaleBand, scaleOrdinal, scaleTime } from 'd3-scale';
   import { format } from 'date-fns';
-  import { extent, median } from 'd3-array';
+  import { extent, median, min, max } from 'd3-array';
   import { stackOffsetExpand } from 'd3-shape';
 
   import {
@@ -106,6 +106,10 @@
       {data}
       x="date"
       xScale={scaleTime()}
+      xDomain={[
+        min(data, d => d.date),
+        new Date(max(data, d => d.date).getTime() + 86400000)
+      ]}
       y="value"
       yDomain={[0, null]}
       yNice
