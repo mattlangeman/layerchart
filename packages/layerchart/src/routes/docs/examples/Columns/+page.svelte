@@ -1,7 +1,7 @@
 <script lang="ts">
   import { cls } from 'svelte-ux';
   import { cubicInOut } from 'svelte/easing';
-  import { scaleBand, scaleOrdinal } from 'd3-scale';
+  import { scaleBand, scaleOrdinal, scaleTime } from 'd3-scale';
   import { format } from 'date-fns';
   import { extent, median } from 'd3-array';
   import { stackOffsetExpand } from 'd3-shape';
@@ -105,14 +105,14 @@
     <Chart
       {data}
       x="date"
-      xScale={scaleBand().padding(0.4)}
+      xScale={scaleTime()}
       y="value"
       yDomain={[0, null]}
       yNice
-      padding={{ left: 16, bottom: 24 }}
+      padding={{ top: 20, left: 16, bottom: 24, right: 20 }}
     >
       <Svg>
-        <Axis placement="left" grid rule />
+        <Axis placement="left" grid />
         <Axis placement="bottom" format={(d) => formatDate(d, PeriodType.Day, 'short')} rule />
         <Bars radius={4} strokeWidth={1} class="fill-accent-500" />
       </Svg>

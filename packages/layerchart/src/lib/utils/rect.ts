@@ -1,7 +1,7 @@
 import { derived } from 'svelte/store';
 import { max, min } from 'd3-array';
 
-import { groupScaleBand, isScaleBand } from './scales';
+import { groupScaleBand, isScaleBand, isScaleTime, getScaleTimeBandWidth} from './scales';
 
 type DimensionGetterOptions = {
   /** Override `x` accessor from context */
@@ -34,7 +34,31 @@ export function createDimensionGetter(context, options?: DimensionGetterOptions)
     [flatData, xGet, yGet, xRange, yRange, xScale, yScale, xAccessor, yAccessor],
     ([$flatData, $xGet, $yGet, $xRange, $yRange, $xScale, $yScale, $xAccessor, $yAccessor]) => {
       return function getter(item) {
-        if (isScaleBand($yScale)) {
+        if (isScaleTime($xScale)) {
+          // Calculate width
+          const bandWidth = getScaleTimeBandWidth($xScale, $xRange);
+          const barPadding = 0.3;
+          const width = bandWidth - (bandWidth * barPadding);
+          const leftBarPadding = (bandWidth - width) / 2;
+
+          // Calculate x position
+          const xValue = $xAccessor ? $xAccessor(item) : $xGet(item);
+          const yValue = $yAccessor ? $yAccessor(item) : $yGet(item);
+          const xPos = $xScale(xValue) + leftBarPadding;
+          const yPos = $yScale(yValue);
+
+          // Calculate height
+          const baseline = min($yRange); // Assuming the baseline is the minimum of the yRange
+          const height = $yScale(baseline) - yPos;
+
+          return {
+            x : xPos,
+            y : yPos,
+            width,
+            height
+          };
+
+        } else if (isScaleBand($yScale)) {
           // Horizontal band
           const y1Scale = groupBy
             ? groupScaleBand($yScale, $flatData, groupBy, options?.groupPadding)

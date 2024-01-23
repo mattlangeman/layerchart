@@ -31,6 +31,29 @@ export function isScaleBand(scale) {
   return typeof scale.bandwidth === 'function';
 }
 
+export function isScaleTime(scale) {
+  // Check if the domain is scaleBand
+  if (isScaleBand(scale)) {
+    return false;
+  }
+  // Check if the domain of the scale consists of Date objects
+  const domain = scale.domain();
+  return domain.length > 0 && domain.every(d => d instanceof Date);
+}
+
+export function getScaleTimeBandWidth(scale, range) {
+  // TODO: likely need to add an interval to this calculation for day/month/quart/year
+  // currently this assumes a day interval
+  const domain = scale.domain();
+  const startDate = domain[0];
+  const endDate = domain[1];
+  const dateDiff = endDate.getTime() - startDate.getTime();
+  const daysDiff = Math.ceil(dateDiff / (1000 * 3600 * 24));
+  const numBars = daysDiff + 1;
+  const bandWidth = (range[1] - range[0]) / numBars;
+  return bandWidth;
+}
+
 /**
  *  Generic way to invert a scale value, handling scaleBand and continuous scales (linear, time, etc).
  *  Useful to map mouse event location (x,y) to domain value

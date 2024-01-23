@@ -5,7 +5,7 @@
   import { extent } from 'd3-array';
 
   import Text from './Text.svelte';
-  import { isScaleBand } from '$lib/utils/scales';
+  import { isScaleBand, isScaleTime, getScaleTimeBandWidth } from '$lib/utils/scales';
 
   const { xScale, yScale, xRange, yRange, width } = getContext('LayerCake');
 
@@ -48,8 +48,15 @@
         };
 
       case 'bottom':
+        // If this is a bar chart with timeScale then we need to calculate width of bar/band
+        // TODO: not sure how to check if this is a bar chart
+        let tickOffset = 0
+        if (isScaleTime($xScale)) {
+          const bandWidth = getScaleTimeBandWidth($xScale, $xRange)
+          tickOffset = bandWidth / 2
+        }
         return {
-          x: $xScale(tick) + (isScaleBand($xScale) ? $xScale.bandwidth() / 2 : 0),
+          x: $xScale(tick) + (isScaleBand($xScale) ? $xScale.bandwidth() / 2 : tickOffset),
           y: yRangeMax,
         };
 
